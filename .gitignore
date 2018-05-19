@@ -30,3 +30,191 @@
 *.exe
 *.out
 *.app
+#include <iostream>
+#include <time.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <conio.h>
+
+using namespace std;
+
+int snakelenght=2;
+char direction='d';
+char field[20][30];
+
+class Past
+{
+    int m_nx;
+    int m_ny;
+public:
+    void Init(int x,int y)
+    {
+        m_nx=x;
+        m_ny=y;
+    }
+    int GetX(){return m_nx;}
+    int GetY(){return m_ny;}
+ }past[50];
+
+
+void MakeField();
+void DrawField();
+void Random(int &x, int &y);
+bool IsFree(int &x,int &y);
+void MakeFood();
+bool Food(int &x,int &y);
+bool Move(int &x, int &y);
+void Erase(int x, int y);
+void Past(int x,int y);
+void Key(int &x,int &y);
+bool End(int &x, int &y);
+
+int main()
+{
+    int x=10,y=15;
+    MakeField();
+    MakeFood();
+    DrawField();
+    while(End(x,y))
+    {
+        cout << direction;
+        if(kbhit())
+        {
+            direction=getch();
+            Key(x,y);
+        }
+        else
+            Key(x,y);
+        if(!Move(x,y))
+            break;
+        Past(x,y);
+        system("cls");
+        DrawField();
+        usleep(1000);
+    }
+    cout << "End!";
+    return 0;
+}
+
+void MakeField()
+{
+    for(int i=0;i<20;i++)
+        for(int j=0;j<30;j++)
+            field[i][j]=' ';
+}
+
+void DrawField()
+{
+    for(int i=0;i<=30;i++)
+        cout << "- ";
+    cout << endl;
+    for(int i=0;i<20;i++)
+    {
+        cout << "| ";
+        for(int j=0;j<30;j++)
+            cout << field[i][j] << " ";
+        cout << "|"<< endl;
+    }
+    for(int i=0;i<=30;i++)
+        cout << "- ";
+    cout << endl;
+}
+
+void Random(int &x, int &y)
+{
+    srand(time(0));
+    x=rand()%10;
+    y=rand()%10;
+}
+
+
+bool IsFree(int &x,int &y)
+{
+    if(field[x][y]==' ')
+        return 1;
+    return 0;
+}
+
+void MakeFood()
+{
+    again:
+    int x=0,y=0;
+    Random(x,y);
+    if(IsFree(x,y))
+    field[x][y]='H';
+    else
+        goto again;
+}
+
+bool Food(int &x,int &y)
+{
+    if(field[x][y]=='H')
+    {
+        snakelenght++;
+        return 1;
+    }
+    return 0;
+}
+
+bool Move(int &x, int &y)
+{
+    if(Food(x,y))
+    {
+        field[x][y]='X';
+        MakeFood();
+        return 1;
+    }
+    if(IsFree(x,y))
+    {
+        field[x][y]='X';
+        return 1;
+    }
+    return 0;
+}
+
+void Erase(int x, int y)
+{
+    field[x][y]=' ';
+}
+
+void Past(int x,int y)
+{
+    Erase(past[0].GetX(),past[0].GetY());
+    for (int i=0;i<snakelenght;i++)
+        past[i]=past[i+1];
+    past[snakelenght].Init(x,y);
+}
+
+void Key(int &x,int &y)
+{
+    switch(direction)
+    {
+        case 'd':
+        {
+            y++;
+            break;
+        }
+        case 'a':
+        {
+            y--;
+            break;
+        }
+        case 's':
+        {
+            x++;
+            break;
+        }
+        case 'w':
+        {
+            x--;
+            break;
+        }
+    }
+}
+
+bool End(int &x, int &y)
+{
+    if(field[x][y]==' '||'H')
+        return 1;
+    return 0;
+}
